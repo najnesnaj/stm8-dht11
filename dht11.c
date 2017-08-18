@@ -5,7 +5,10 @@
 #define READ(x, y)  ((x) & (y))
 #define I2C_READ        1
 #define I2C_WRITE       0
-
+//dht11
+#define NUM_OF_BYTES 5
+#define ONE_HIGH     150
+#define ONE_LOW      130
 
 
 
@@ -368,6 +371,58 @@ void _tm1637DioLow(void)
 
 }
 
+void dht11_init(void)
+{
+	PA_DDR |= (1 << 3); //port PA3
+	PA_ODR |= (1 << 3);
+}
+
+/**
+ *  * @brief Reads 5 bytes and put them to data
+ *   * @param data - pointer to output array
+ *    * @returns 0 - if result OK, 1 - if error reading
+ *     * @note Period between functon calls should be more then 2 seconds
+ *      * @note While reading interrupts are disable
+ *      */
+unsigned char DHT_ReadData(unsigned char* data)
+{
+	unsigned char byte_num = 0, bit_num = 0, byte = 0, count = 0;
+	/* sending start condition */
+	PA_ODR &= ~(1 << 3);
+	//DHT_PORT->ODR &= (~DHT_PIN);              // write "0"
+	delay(1);
+	//	Delay(START_DELAY);                       // wait 1 ms
+	PA_ODR |= (1 << 3);
+	PA_DDR &= ~(1 << 3); //port PA3 as input
+	//DHT_PORT->ODR |= DHT_PIN;                 // write "1": make pin as input
+	/* begin reading */
+	while (PA_IDR & (1<<3));          // wait sensor response 20-40us
+	while (!(PA_IDR & (1<<3)));          // pin low 80 ms :response 
+	//	while (!(DHT_PORT->IDR & DHT_PIN));       // pin low 80ms: response
+	while (PA_IDR & (1<<3));          // pin high 
+	//	while (DHT_PORT->IDR & DHT_PIN);          // pin high 80ms: prepare
+	for (byte_num = 0; byte_num < NUM_OF_BYTES; byte_num++)
+	{
+		for (bit_num = 0; bit_num < 8; bit_num++)
+		{
+			while (!(PA_IDR & (1<<3)));          // pin low 80 ms :response 
+			//		while (!(DHT_PORT->IDR & DHT_PIN));     // pin low 50us
+			while (PA_IDR & (1<<3));          // pin high 
+			//		while (DHT_PORT->IDR & DHT_PIN)         // pin high
+			{
+				count++;
+			}
+			if (count > ONE_LOW)
+			{
+				byte |= (1 << (8 - bit_num));
+			}
+			count = 0;
+		}
+		*(data + byte_num) = byte;
+		byte = 0;
+	}
+	return 0;
+}
 
 
 
@@ -378,10 +433,10 @@ int main () {
 	float objTemp;
 	//	UCHAR  x;
 	//	volatile int reg;
+	unsigned char tmpr[5]; //read temp & hum dht11
 	InitializeSystemClock();
-
-	PB_DDR = (0 << 4);
-	PB_DDR = (0 << 5);
+	//	PB_DDR = (0 << 4);
+	//	PB_DDR = (0 << 5);
 	//	PB_ODR &= ~(1 << 4);
 	//	PB_ODR &= ~(1 << 5);
 	PB_CR1 = (1 << 4) | (1 << 5); // push-pull
@@ -394,14 +449,17 @@ int main () {
 
 	InitializeUART();
 	UARTPrintF("uart initialised \n\r");
-	InitializeI2C();
+	//	InitializeI2C();
+	dht11_init();	
 	delay(200);
 	//	UARTPrintF("testing 0 \n\r");
+        DHT_ReadData(tmpr);
 
 
 	//	UARTPrintF("testing 1 \n\r");
 	while (1) {
-		//		objTemp = getBMP280Temperature();
+		objTemp = tmpr[0]; // humidity 
+		//objTemp = tmp[2]; // temperature 
 		//		UARTPrintF("testing 1 \n\r");
 		eerste=0;tweede=0;derde=0;vierde=0;
 		//make measurement suitable for display

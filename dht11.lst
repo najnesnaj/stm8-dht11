@@ -1,0 +1,1356 @@
+                                      1 ;--------------------------------------------------------
+                                      2 ; File Created by SDCC : free open source ANSI-C Compiler
+                                      3 ; Version 3.4.0 #8981 (Jul 11 2014) (Linux)
+                                      4 ; This file was generated Fri Aug 18 15:54:49 2017
+                                      5 ;--------------------------------------------------------
+                                      6 	.module dht11
+                                      7 	.optsdcc -mstm8
+                                      8 	
+                                      9 ;--------------------------------------------------------
+                                     10 ; Public variables in this module
+                                     11 ;--------------------------------------------------------
+                                     12 	.globl _segmentMap
+                                     13 	.globl _main
+                                     14 	.globl _DHT_ReadData
+                                     15 	.globl _dht11_init
+                                     16 	.globl _tm1637DisplayDecimal
+                                     17 	.globl _tm1637Init
+                                     18 	.globl _InitializeUART
+                                     19 	.globl _InitializeI2C
+                                     20 	.globl _i2c_read_register
+                                     21 	.globl _print_byte_hex
+                                     22 	.globl _i2c_set_start_ack
+                                     23 	.globl _i2c_send_address
+                                     24 	.globl _UARTPrintF
+                                     25 	.globl _i2c_send_reg
+                                     26 	.globl _i2c_set_stop
+                                     27 	.globl _i2c_set_nak
+                                     28 	.globl _i2c_read
+                                     29 	.globl _delay
+                                     30 	.globl _InitializeSystemClock
+                                     31 	.globl _delayTenMicro
+                                     32 	.globl _tm1637SetBrightness
+                                     33 	.globl __tm1637Start
+                                     34 	.globl __tm1637Stop
+                                     35 	.globl __tm1637ReadResult
+                                     36 	.globl __tm1637WriteByte
+                                     37 	.globl __tm1637ClkHigh
+                                     38 	.globl __tm1637ClkLow
+                                     39 	.globl __tm1637DioHigh
+                                     40 	.globl __tm1637DioLow
+                                     41 ;--------------------------------------------------------
+                                     42 ; ram data
+                                     43 ;--------------------------------------------------------
+                                     44 	.area DATA
+                                     45 ;--------------------------------------------------------
+                                     46 ; ram data
+                                     47 ;--------------------------------------------------------
+                                     48 	.area INITIALIZED
+                                     49 ;--------------------------------------------------------
+                                     50 ; Stack segment in internal ram 
+                                     51 ;--------------------------------------------------------
+                                     52 	.area	SSEG
+      000000                         53 __start__stack:
+      000000                         54 	.ds	1
+                                     55 
+                                     56 ;--------------------------------------------------------
+                                     57 ; absolute external ram data
+                                     58 ;--------------------------------------------------------
+                                     59 	.area DABS (ABS)
+                                     60 ;--------------------------------------------------------
+                                     61 ; interrupt vector 
+                                     62 ;--------------------------------------------------------
+                                     63 	.area HOME
+      000000                         64 __interrupt_vect:
+      000000 82v00u00u00             65 	int s_GSINIT ;reset
+      000004 82 00 00 00             66 	int 0x0000 ;trap
+      000008 82 00 00 00             67 	int 0x0000 ;int0
+      00000C 82 00 00 00             68 	int 0x0000 ;int1
+      000010 82 00 00 00             69 	int 0x0000 ;int2
+      000014 82 00 00 00             70 	int 0x0000 ;int3
+      000018 82 00 00 00             71 	int 0x0000 ;int4
+      00001C 82 00 00 00             72 	int 0x0000 ;int5
+      000020 82 00 00 00             73 	int 0x0000 ;int6
+      000024 82 00 00 00             74 	int 0x0000 ;int7
+      000028 82 00 00 00             75 	int 0x0000 ;int8
+      00002C 82 00 00 00             76 	int 0x0000 ;int9
+      000030 82 00 00 00             77 	int 0x0000 ;int10
+      000034 82 00 00 00             78 	int 0x0000 ;int11
+      000038 82 00 00 00             79 	int 0x0000 ;int12
+      00003C 82 00 00 00             80 	int 0x0000 ;int13
+      000040 82 00 00 00             81 	int 0x0000 ;int14
+      000044 82 00 00 00             82 	int 0x0000 ;int15
+      000048 82 00 00 00             83 	int 0x0000 ;int16
+      00004C 82 00 00 00             84 	int 0x0000 ;int17
+      000050 82 00 00 00             85 	int 0x0000 ;int18
+      000054 82 00 00 00             86 	int 0x0000 ;int19
+      000058 82 00 00 00             87 	int 0x0000 ;int20
+      00005C 82 00 00 00             88 	int 0x0000 ;int21
+      000060 82 00 00 00             89 	int 0x0000 ;int22
+      000064 82 00 00 00             90 	int 0x0000 ;int23
+      000068 82 00 00 00             91 	int 0x0000 ;int24
+      00006C 82 00 00 00             92 	int 0x0000 ;int25
+      000070 82 00 00 00             93 	int 0x0000 ;int26
+      000074 82 00 00 00             94 	int 0x0000 ;int27
+      000078 82 00 00 00             95 	int 0x0000 ;int28
+      00007C 82 00 00 00             96 	int 0x0000 ;int29
+                                     97 ;--------------------------------------------------------
+                                     98 ; global & static initialisations
+                                     99 ;--------------------------------------------------------
+                                    100 	.area HOME
+                                    101 	.area GSINIT
+                                    102 	.area GSFINAL
+                                    103 	.area GSINIT
+      000000                        104 __sdcc_gs_init_startup:
+      000000                        105 __sdcc_init_data:
+                                    106 ; stm8_genXINIT() start
+      000000 AEr00r00         [ 2]  107 	ldw x, #l_DATA
+      000003 27 07            [ 1]  108 	jreq	00002$
+      000005                        109 00001$:
+      000005 72 4FuFFuFF      [ 1]  110 	clr (s_DATA - 1, x)
+      000009 5A               [ 2]  111 	decw x
+      00000A 26 F9            [ 1]  112 	jrne	00001$
+      00000C                        113 00002$:
+      00000C AEr00r00         [ 2]  114 	ldw	x, #l_INITIALIZER
+      00000F 27 09            [ 1]  115 	jreq	00004$
+      000011                        116 00003$:
+      000011 D6uFFuFF         [ 1]  117 	ld	a, (s_INITIALIZER - 1, x)
+      000014 D7uFFuFF         [ 1]  118 	ld	(s_INITIALIZED - 1, x), a
+      000017 5A               [ 2]  119 	decw	x
+      000018 26 F7            [ 1]  120 	jrne	00003$
+      00001A                        121 00004$:
+                                    122 ; stm8_genXINIT() end
+                                    123 	.area GSFINAL
+      000000 CCr00r80         [ 2]  124 	jp	__sdcc_program_startup
+                                    125 ;--------------------------------------------------------
+                                    126 ; Home
+                                    127 ;--------------------------------------------------------
+                                    128 	.area HOME
+                                    129 	.area HOME
+      000080                        130 __sdcc_program_startup:
+      000080 CCr04r7B         [ 2]  131 	jp	_main
+                                    132 ;	return from main will return to caller
+                                    133 ;--------------------------------------------------------
+                                    134 ; code
+                                    135 ;--------------------------------------------------------
+                                    136 	.area CODE
+                                    137 ;	dht11.c: 17: void delayTenMicro (void) {
+                                    138 ;	-----------------------------------------
+                                    139 ;	 function delayTenMicro
+                                    140 ;	-----------------------------------------
+      000000                        141 _delayTenMicro:
+                                    142 ;	dht11.c: 19: for (a = 0; a < 50; ++a)
+      000000 A6 32            [ 1]  143 	ld	a, #0x32
+      000002                        144 00104$:
+                                    145 ;	dht11.c: 20: __asm__("nop");
+      000002 9D               [ 1]  146 	nop
+      000003 4A               [ 1]  147 	dec	a
+                                    148 ;	dht11.c: 19: for (a = 0; a < 50; ++a)
+      000004 4D               [ 1]  149 	tnz	a
+      000005 26 FB            [ 1]  150 	jrne	00104$
+      000007 81               [ 4]  151 	ret
+                                    152 ;	dht11.c: 23: void InitializeSystemClock() {
+                                    153 ;	-----------------------------------------
+                                    154 ;	 function InitializeSystemClock
+                                    155 ;	-----------------------------------------
+      000008                        156 _InitializeSystemClock:
+                                    157 ;	dht11.c: 24: CLK_ICKR = 0;                       //  Reset the Internal Clock Register.
+      000008 AE 50 C0         [ 2]  158 	ldw	x, #0x50c0
+      00000B 7F               [ 1]  159 	clr	(x)
+                                    160 ;	dht11.c: 25: CLK_ICKR = CLK_HSIEN;               //  Enable the HSI.
+      00000C AE 50 C0         [ 2]  161 	ldw	x, #0x50c0
+      00000F A6 01            [ 1]  162 	ld	a, #0x01
+      000011 F7               [ 1]  163 	ld	(x), a
+                                    164 ;	dht11.c: 26: CLK_ECKR = 0;                       //  Disable the external clock.
+      000012 AE 50 C1         [ 2]  165 	ldw	x, #0x50c1
+      000015 7F               [ 1]  166 	clr	(x)
+                                    167 ;	dht11.c: 27: while ((CLK_ICKR & CLK_HSIRDY) == 0);       //  Wait for the HSI to be ready for use.
+      000016                        168 00101$:
+      000016 AE 50 C0         [ 2]  169 	ldw	x, #0x50c0
+      000019 F6               [ 1]  170 	ld	a, (x)
+      00001A A5 02            [ 1]  171 	bcp	a, #0x02
+      00001C 27 F8            [ 1]  172 	jreq	00101$
+                                    173 ;	dht11.c: 28: CLK_CKDIVR = 0;                     //  Ensure the clocks are running at full speed.
+      00001E AE 50 C6         [ 2]  174 	ldw	x, #0x50c6
+      000021 7F               [ 1]  175 	clr	(x)
+                                    176 ;	dht11.c: 29: CLK_PCKENR1 = 0xff;                 //  Enable all peripheral clocks.
+      000022 AE 50 C7         [ 2]  177 	ldw	x, #0x50c7
+      000025 A6 FF            [ 1]  178 	ld	a, #0xff
+      000027 F7               [ 1]  179 	ld	(x), a
+                                    180 ;	dht11.c: 30: CLK_PCKENR2 = 0xff;                 //  Ditto.
+      000028 AE 50 CA         [ 2]  181 	ldw	x, #0x50ca
+      00002B A6 FF            [ 1]  182 	ld	a, #0xff
+      00002D F7               [ 1]  183 	ld	(x), a
+                                    184 ;	dht11.c: 31: CLK_CCOR = 0;                       //  Turn off CCO.
+      00002E AE 50 C9         [ 2]  185 	ldw	x, #0x50c9
+      000031 7F               [ 1]  186 	clr	(x)
+                                    187 ;	dht11.c: 32: CLK_HSITRIMR = 0;                   //  Turn off any HSIU trimming.
+      000032 AE 50 CC         [ 2]  188 	ldw	x, #0x50cc
+      000035 7F               [ 1]  189 	clr	(x)
+                                    190 ;	dht11.c: 33: CLK_SWIMCCR = 0;                    //  Set SWIM to run at clock / 2.
+      000036 AE 50 CD         [ 2]  191 	ldw	x, #0x50cd
+      000039 7F               [ 1]  192 	clr	(x)
+                                    193 ;	dht11.c: 34: CLK_SWR = 0xe1;                     //  Use HSI as the clock source.
+      00003A AE 50 C4         [ 2]  194 	ldw	x, #0x50c4
+      00003D A6 E1            [ 1]  195 	ld	a, #0xe1
+      00003F F7               [ 1]  196 	ld	(x), a
+                                    197 ;	dht11.c: 35: CLK_SWCR = 0;                       //  Reset the clock switch control register.
+      000040 AE 50 C5         [ 2]  198 	ldw	x, #0x50c5
+      000043 7F               [ 1]  199 	clr	(x)
+                                    200 ;	dht11.c: 36: CLK_SWCR = CLK_SWEN;                //  Enable switching.
+      000044 AE 50 C5         [ 2]  201 	ldw	x, #0x50c5
+      000047 A6 02            [ 1]  202 	ld	a, #0x02
+      000049 F7               [ 1]  203 	ld	(x), a
+                                    204 ;	dht11.c: 37: while ((CLK_SWCR & CLK_SWBSY) != 0);        //  Pause while the clock switch is busy.
+      00004A                        205 00104$:
+      00004A AE 50 C5         [ 2]  206 	ldw	x, #0x50c5
+      00004D F6               [ 1]  207 	ld	a, (x)
+      00004E 44               [ 1]  208 	srl	a
+      00004F 25 F9            [ 1]  209 	jrc	00104$
+      000051 81               [ 4]  210 	ret
+                                    211 ;	dht11.c: 39: void delay (int time_ms) {
+                                    212 ;	-----------------------------------------
+                                    213 ;	 function delay
+                                    214 ;	-----------------------------------------
+      000052                        215 _delay:
+      000052 52 0A            [ 2]  216 	sub	sp, #10
+                                    217 ;	dht11.c: 41: for (x = 0; x < 1036*time_ms; ++x)
+      000054 5F               [ 1]  218 	clrw	x
+      000055 1F 03            [ 2]  219 	ldw	(0x03, sp), x
+      000057 1F 01            [ 2]  220 	ldw	(0x01, sp), x
+      000059 1E 0D            [ 2]  221 	ldw	x, (0x0d, sp)
+      00005B 89               [ 2]  222 	pushw	x
+      00005C 4B 0C            [ 1]  223 	push	#0x0c
+      00005E 4B 04            [ 1]  224 	push	#0x04
+      000060 CDr00r00         [ 4]  225 	call	__mulint
+      000063 5B 04            [ 2]  226 	addw	sp, #4
+      000065 1F 09            [ 2]  227 	ldw	(0x09, sp), x
+      000067                        228 00103$:
+      000067 16 09            [ 2]  229 	ldw	y, (0x09, sp)
+      000069 17 07            [ 2]  230 	ldw	(0x07, sp), y
+      00006B 7B 07            [ 1]  231 	ld	a, (0x07, sp)
+      00006D 49               [ 1]  232 	rlc	a
+      00006E 4F               [ 1]  233 	clr	a
+      00006F A2 00            [ 1]  234 	sbc	a, #0x00
+      000071 6B 06            [ 1]  235 	ld	(0x06, sp), a
+      000073 6B 05            [ 1]  236 	ld	(0x05, sp), a
+      000075 1E 03            [ 2]  237 	ldw	x, (0x03, sp)
+      000077 13 07            [ 2]  238 	cpw	x, (0x07, sp)
+      000079 7B 02            [ 1]  239 	ld	a, (0x02, sp)
+      00007B 12 06            [ 1]  240 	sbc	a, (0x06, sp)
+      00007D 7B 01            [ 1]  241 	ld	a, (0x01, sp)
+      00007F 12 05            [ 1]  242 	sbc	a, (0x05, sp)
+      000081 2E 17            [ 1]  243 	jrsge	00105$
+                                    244 ;	dht11.c: 42: __asm__("nop");
+      000083 9D               [ 1]  245 	nop
+                                    246 ;	dht11.c: 41: for (x = 0; x < 1036*time_ms; ++x)
+      000084 16 03            [ 2]  247 	ldw	y, (0x03, sp)
+      000086 72 A9 00 01      [ 2]  248 	addw	y, #0x0001
+      00008A 7B 02            [ 1]  249 	ld	a, (0x02, sp)
+      00008C A9 00            [ 1]  250 	adc	a, #0x00
+      00008E 97               [ 1]  251 	ld	xl, a
+      00008F 7B 01            [ 1]  252 	ld	a, (0x01, sp)
+      000091 A9 00            [ 1]  253 	adc	a, #0x00
+      000093 95               [ 1]  254 	ld	xh, a
+      000094 17 03            [ 2]  255 	ldw	(0x03, sp), y
+      000096 1F 01            [ 2]  256 	ldw	(0x01, sp), x
+      000098 20 CD            [ 2]  257 	jra	00103$
+      00009A                        258 00105$:
+      00009A 5B 0A            [ 2]  259 	addw	sp, #10
+      00009C 81               [ 4]  260 	ret
+                                    261 ;	dht11.c: 44: void i2c_read (unsigned char *x) {
+                                    262 ;	-----------------------------------------
+                                    263 ;	 function i2c_read
+                                    264 ;	-----------------------------------------
+      00009D                        265 _i2c_read:
+                                    266 ;	dht11.c: 45: while ((I2C_SR1 & I2C_RXNE) == 0);
+      00009D                        267 00101$:
+      00009D AE 52 17         [ 2]  268 	ldw	x, #0x5217
+      0000A0 F6               [ 1]  269 	ld	a, (x)
+      0000A1 A5 40            [ 1]  270 	bcp	a, #0x40
+      0000A3 27 F8            [ 1]  271 	jreq	00101$
+                                    272 ;	dht11.c: 46: *x = I2C_DR;
+      0000A5 16 03            [ 2]  273 	ldw	y, (0x03, sp)
+      0000A7 AE 52 16         [ 2]  274 	ldw	x, #0x5216
+      0000AA F6               [ 1]  275 	ld	a, (x)
+      0000AB 90 F7            [ 1]  276 	ld	(y), a
+      0000AD 81               [ 4]  277 	ret
+                                    278 ;	dht11.c: 48: void i2c_set_nak (void) {
+                                    279 ;	-----------------------------------------
+                                    280 ;	 function i2c_set_nak
+                                    281 ;	-----------------------------------------
+      0000AE                        282 _i2c_set_nak:
+                                    283 ;	dht11.c: 49: I2C_CR2 &= ~I2C_ACK;
+      0000AE AE 52 11         [ 2]  284 	ldw	x, #0x5211
+      0000B1 F6               [ 1]  285 	ld	a, (x)
+      0000B2 A4 FB            [ 1]  286 	and	a, #0xfb
+      0000B4 F7               [ 1]  287 	ld	(x), a
+      0000B5 81               [ 4]  288 	ret
+                                    289 ;	dht11.c: 51: void i2c_set_stop (void) {
+                                    290 ;	-----------------------------------------
+                                    291 ;	 function i2c_set_stop
+                                    292 ;	-----------------------------------------
+      0000B6                        293 _i2c_set_stop:
+                                    294 ;	dht11.c: 52: I2C_CR2 |= I2C_STOP;
+      0000B6 AE 52 11         [ 2]  295 	ldw	x, #0x5211
+      0000B9 F6               [ 1]  296 	ld	a, (x)
+      0000BA AA 02            [ 1]  297 	or	a, #0x02
+      0000BC F7               [ 1]  298 	ld	(x), a
+      0000BD 81               [ 4]  299 	ret
+                                    300 ;	dht11.c: 54: void i2c_send_reg (UCHAR addr) {
+                                    301 ;	-----------------------------------------
+                                    302 ;	 function i2c_send_reg
+                                    303 ;	-----------------------------------------
+      0000BE                        304 _i2c_send_reg:
+      0000BE 52 02            [ 2]  305 	sub	sp, #2
+                                    306 ;	dht11.c: 56: reg = I2C_SR1;
+      0000C0 AE 52 17         [ 2]  307 	ldw	x, #0x5217
+      0000C3 F6               [ 1]  308 	ld	a, (x)
+      0000C4 5F               [ 1]  309 	clrw	x
+      0000C5 97               [ 1]  310 	ld	xl, a
+      0000C6 1F 01            [ 2]  311 	ldw	(0x01, sp), x
+                                    312 ;	dht11.c: 57: reg = I2C_SR3;
+      0000C8 AE 52 19         [ 2]  313 	ldw	x, #0x5219
+      0000CB F6               [ 1]  314 	ld	a, (x)
+      0000CC 5F               [ 1]  315 	clrw	x
+      0000CD 97               [ 1]  316 	ld	xl, a
+      0000CE 1F 01            [ 2]  317 	ldw	(0x01, sp), x
+                                    318 ;	dht11.c: 58: I2C_DR = addr;
+      0000D0 AE 52 16         [ 2]  319 	ldw	x, #0x5216
+      0000D3 7B 05            [ 1]  320 	ld	a, (0x05, sp)
+      0000D5 F7               [ 1]  321 	ld	(x), a
+                                    322 ;	dht11.c: 59: while ((I2C_SR1 & I2C_TXE) == 0);
+      0000D6                        323 00101$:
+      0000D6 AE 52 17         [ 2]  324 	ldw	x, #0x5217
+      0000D9 F6               [ 1]  325 	ld	a, (x)
+      0000DA 48               [ 1]  326 	sll	a
+      0000DB 24 F9            [ 1]  327 	jrnc	00101$
+      0000DD 5B 02            [ 2]  328 	addw	sp, #2
+      0000DF 81               [ 4]  329 	ret
+                                    330 ;	dht11.c: 63: void UARTPrintF (char *message) {
+                                    331 ;	-----------------------------------------
+                                    332 ;	 function UARTPrintF
+                                    333 ;	-----------------------------------------
+      0000E0                        334 _UARTPrintF:
+                                    335 ;	dht11.c: 64: char *ch = message;
+      0000E0 16 03            [ 2]  336 	ldw	y, (0x03, sp)
+                                    337 ;	dht11.c: 65: while (*ch) {
+      0000E2                        338 00104$:
+      0000E2 90 F6            [ 1]  339 	ld	a, (y)
+      0000E4 4D               [ 1]  340 	tnz	a
+      0000E5 27 0F            [ 1]  341 	jreq	00107$
+                                    342 ;	dht11.c: 66: UART1_DR = (unsigned char) *ch;     //  Put the next character into the data transmission register.
+      0000E7 AE 52 31         [ 2]  343 	ldw	x, #0x5231
+      0000EA F7               [ 1]  344 	ld	(x), a
+                                    345 ;	dht11.c: 67: while ((UART1_SR & SR_TXE) == 0);   //  Wait for transmission to complete.
+      0000EB                        346 00101$:
+      0000EB AE 52 30         [ 2]  347 	ldw	x, #0x5230
+      0000EE F6               [ 1]  348 	ld	a, (x)
+      0000EF 48               [ 1]  349 	sll	a
+      0000F0 24 F9            [ 1]  350 	jrnc	00101$
+                                    351 ;	dht11.c: 68: ch++;                               //  Grab the next character.
+      0000F2 90 5C            [ 2]  352 	incw	y
+      0000F4 20 EC            [ 2]  353 	jra	00104$
+      0000F6                        354 00107$:
+      0000F6 81               [ 4]  355 	ret
+                                    356 ;	dht11.c: 74: void i2c_send_address (UCHAR addr, UCHAR mode) {
+                                    357 ;	-----------------------------------------
+                                    358 ;	 function i2c_send_address
+                                    359 ;	-----------------------------------------
+      0000F7                        360 _i2c_send_address:
+      0000F7 52 03            [ 2]  361 	sub	sp, #3
+                                    362 ;	dht11.c: 76: reg = I2C_SR1;
+      0000F9 AE 52 17         [ 2]  363 	ldw	x, #0x5217
+      0000FC F6               [ 1]  364 	ld	a, (x)
+      0000FD 5F               [ 1]  365 	clrw	x
+      0000FE 97               [ 1]  366 	ld	xl, a
+      0000FF 1F 01            [ 2]  367 	ldw	(0x01, sp), x
+                                    368 ;	dht11.c: 77: I2C_DR = (addr << 1) | mode;
+      000101 7B 06            [ 1]  369 	ld	a, (0x06, sp)
+      000103 48               [ 1]  370 	sll	a
+      000104 1A 07            [ 1]  371 	or	a, (0x07, sp)
+      000106 AE 52 16         [ 2]  372 	ldw	x, #0x5216
+      000109 F7               [ 1]  373 	ld	(x), a
+                                    374 ;	dht11.c: 78: if (mode == I2C_READ) {
+      00010A 7B 07            [ 1]  375 	ld	a, (0x07, sp)
+      00010C A1 01            [ 1]  376 	cp	a, #0x01
+      00010E 26 06            [ 1]  377 	jrne	00127$
+      000110 A6 01            [ 1]  378 	ld	a, #0x01
+      000112 6B 03            [ 1]  379 	ld	(0x03, sp), a
+      000114 20 02            [ 2]  380 	jra	00128$
+      000116                        381 00127$:
+      000116 0F 03            [ 1]  382 	clr	(0x03, sp)
+      000118                        383 00128$:
+      000118 0D 03            [ 1]  384 	tnz	(0x03, sp)
+      00011A 27 08            [ 1]  385 	jreq	00103$
+                                    386 ;	dht11.c: 79: I2C_OARL = 0;
+      00011C AE 52 13         [ 2]  387 	ldw	x, #0x5213
+      00011F 7F               [ 1]  388 	clr	(x)
+                                    389 ;	dht11.c: 80: I2C_OARH = 0;
+      000120 AE 52 14         [ 2]  390 	ldw	x, #0x5214
+      000123 7F               [ 1]  391 	clr	(x)
+                                    392 ;	dht11.c: 83: while ((I2C_SR1 & I2C_ADDR) == 0);
+      000124                        393 00103$:
+                                    394 ;	dht11.c: 76: reg = I2C_SR1;
+      000124 AE 52 17         [ 2]  395 	ldw	x, #0x5217
+      000127 F6               [ 1]  396 	ld	a, (x)
+                                    397 ;	dht11.c: 83: while ((I2C_SR1 & I2C_ADDR) == 0);
+      000128 A5 02            [ 1]  398 	bcp	a, #0x02
+      00012A 27 F8            [ 1]  399 	jreq	00103$
+                                    400 ;	dht11.c: 84: if (mode == I2C_READ)
+      00012C 0D 03            [ 1]  401 	tnz	(0x03, sp)
+      00012E 27 06            [ 1]  402 	jreq	00108$
+                                    403 ;	dht11.c: 85: UNSET (I2C_SR1, I2C_ADDR);
+      000130 A4 FD            [ 1]  404 	and	a, #0xfd
+      000132 AE 52 17         [ 2]  405 	ldw	x, #0x5217
+      000135 F7               [ 1]  406 	ld	(x), a
+      000136                        407 00108$:
+      000136 5B 03            [ 2]  408 	addw	sp, #3
+      000138 81               [ 4]  409 	ret
+                                    410 ;	dht11.c: 88: void i2c_set_start_ack (void) {
+                                    411 ;	-----------------------------------------
+                                    412 ;	 function i2c_set_start_ack
+                                    413 ;	-----------------------------------------
+      000139                        414 _i2c_set_start_ack:
+                                    415 ;	dht11.c: 89: I2C_CR2 = I2C_ACK | I2C_START;
+      000139 AE 52 11         [ 2]  416 	ldw	x, #0x5211
+      00013C A6 05            [ 1]  417 	ld	a, #0x05
+      00013E F7               [ 1]  418 	ld	(x), a
+                                    419 ;	dht11.c: 90: while ((I2C_SR1 & I2C_SB) == 0);
+      00013F                        420 00101$:
+      00013F AE 52 17         [ 2]  421 	ldw	x, #0x5217
+      000142 F6               [ 1]  422 	ld	a, (x)
+      000143 44               [ 1]  423 	srl	a
+      000144 24 F9            [ 1]  424 	jrnc	00101$
+      000146 81               [ 4]  425 	ret
+                                    426 ;	dht11.c: 97: void print_byte_hex (unsigned char buffer) {
+                                    427 ;	-----------------------------------------
+                                    428 ;	 function print_byte_hex
+                                    429 ;	-----------------------------------------
+      000147                        430 _print_byte_hex:
+      000147 52 0C            [ 2]  431 	sub	sp, #12
+                                    432 ;	dht11.c: 100: a = (buffer >> 4);
+      000149 7B 0F            [ 1]  433 	ld	a, (0x0f, sp)
+      00014B 4E               [ 1]  434 	swap	a
+      00014C A4 0F            [ 1]  435 	and	a, #0x0f
+      00014E 5F               [ 1]  436 	clrw	x
+      00014F 97               [ 1]  437 	ld	xl, a
+                                    438 ;	dht11.c: 101: if (a > 9)
+      000150 A3 00 09         [ 2]  439 	cpw	x, #0x0009
+      000153 2D 07            [ 1]  440 	jrsle	00102$
+                                    441 ;	dht11.c: 102: a = a + 'a' - 10;
+      000155 1C 00 57         [ 2]  442 	addw	x, #0x0057
+      000158 1F 03            [ 2]  443 	ldw	(0x03, sp), x
+      00015A 20 05            [ 2]  444 	jra	00103$
+      00015C                        445 00102$:
+                                    446 ;	dht11.c: 104: a += '0'; 
+      00015C 1C 00 30         [ 2]  447 	addw	x, #0x0030
+      00015F 1F 03            [ 2]  448 	ldw	(0x03, sp), x
+      000161                        449 00103$:
+                                    450 ;	dht11.c: 105: b = buffer & 0x0f;
+      000161 7B 0F            [ 1]  451 	ld	a, (0x0f, sp)
+      000163 A4 0F            [ 1]  452 	and	a, #0x0f
+      000165 5F               [ 1]  453 	clrw	x
+      000166 97               [ 1]  454 	ld	xl, a
+                                    455 ;	dht11.c: 106: if (b > 9)
+      000167 A3 00 09         [ 2]  456 	cpw	x, #0x0009
+      00016A 2D 07            [ 1]  457 	jrsle	00105$
+                                    458 ;	dht11.c: 107: b = b + 'a' - 10;
+      00016C 1C 00 57         [ 2]  459 	addw	x, #0x0057
+      00016F 1F 01            [ 2]  460 	ldw	(0x01, sp), x
+      000171 20 05            [ 2]  461 	jra	00106$
+      000173                        462 00105$:
+                                    463 ;	dht11.c: 109: b += '0'; 
+      000173 1C 00 30         [ 2]  464 	addw	x, #0x0030
+      000176 1F 01            [ 2]  465 	ldw	(0x01, sp), x
+      000178                        466 00106$:
+                                    467 ;	dht11.c: 110: message[0] = a;
+      000178 90 96            [ 1]  468 	ldw	y, sp
+      00017A 72 A9 00 05      [ 2]  469 	addw	y, #5
+      00017E 7B 04            [ 1]  470 	ld	a, (0x04, sp)
+      000180 90 F7            [ 1]  471 	ld	(y), a
+                                    472 ;	dht11.c: 111: message[1] = b;
+      000182 93               [ 1]  473 	ldw	x, y
+      000183 5C               [ 2]  474 	incw	x
+      000184 7B 02            [ 1]  475 	ld	a, (0x02, sp)
+      000186 F7               [ 1]  476 	ld	(x), a
+                                    477 ;	dht11.c: 112: message[2] = 0;
+      000187 93               [ 1]  478 	ldw	x, y
+      000188 5C               [ 2]  479 	incw	x
+      000189 5C               [ 2]  480 	incw	x
+      00018A 7F               [ 1]  481 	clr	(x)
+                                    482 ;	dht11.c: 113: UARTPrintF (message);
+      00018B 90 89            [ 2]  483 	pushw	y
+      00018D CDr00rE0         [ 4]  484 	call	_UARTPrintF
+      000190 5B 02            [ 2]  485 	addw	sp, #2
+      000192 5B 0C            [ 2]  486 	addw	sp, #12
+      000194 81               [ 4]  487 	ret
+                                    488 ;	dht11.c: 117: unsigned char i2c_read_register (UCHAR addr, UCHAR rg) {
+                                    489 ;	-----------------------------------------
+                                    490 ;	 function i2c_read_register
+                                    491 ;	-----------------------------------------
+      000195                        492 _i2c_read_register:
+      000195 52 02            [ 2]  493 	sub	sp, #2
+                                    494 ;	dht11.c: 120: i2c_set_start_ack ();
+      000197 CDr01r39         [ 4]  495 	call	_i2c_set_start_ack
+                                    496 ;	dht11.c: 121: i2c_send_address (addr, I2C_WRITE);
+      00019A 4B 00            [ 1]  497 	push	#0x00
+      00019C 7B 06            [ 1]  498 	ld	a, (0x06, sp)
+      00019E 88               [ 1]  499 	push	a
+      00019F CDr00rF7         [ 4]  500 	call	_i2c_send_address
+      0001A2 5B 02            [ 2]  501 	addw	sp, #2
+                                    502 ;	dht11.c: 122: i2c_send_reg (rg);
+      0001A4 7B 06            [ 1]  503 	ld	a, (0x06, sp)
+      0001A6 88               [ 1]  504 	push	a
+      0001A7 CDr00rBE         [ 4]  505 	call	_i2c_send_reg
+      0001AA 84               [ 1]  506 	pop	a
+                                    507 ;	dht11.c: 123: i2c_set_start_ack ();
+      0001AB CDr01r39         [ 4]  508 	call	_i2c_set_start_ack
+                                    509 ;	dht11.c: 124: i2c_send_address (addr, I2C_READ);
+      0001AE 4B 01            [ 1]  510 	push	#0x01
+      0001B0 7B 06            [ 1]  511 	ld	a, (0x06, sp)
+      0001B2 88               [ 1]  512 	push	a
+      0001B3 CDr00rF7         [ 4]  513 	call	_i2c_send_address
+      0001B6 5B 02            [ 2]  514 	addw	sp, #2
+                                    515 ;	dht11.c: 125: reg = I2C_SR1;
+      0001B8 AE 52 17         [ 2]  516 	ldw	x, #0x5217
+      0001BB F6               [ 1]  517 	ld	a, (x)
+      0001BC 6B 01            [ 1]  518 	ld	(0x01, sp), a
+                                    519 ;	dht11.c: 126: reg = I2C_SR3;
+      0001BE AE 52 19         [ 2]  520 	ldw	x, #0x5219
+      0001C1 F6               [ 1]  521 	ld	a, (x)
+      0001C2 6B 01            [ 1]  522 	ld	(0x01, sp), a
+                                    523 ;	dht11.c: 127: i2c_set_nak ();
+      0001C4 CDr00rAE         [ 4]  524 	call	_i2c_set_nak
+                                    525 ;	dht11.c: 128: i2c_set_stop ();
+      0001C7 CDr00rB6         [ 4]  526 	call	_i2c_set_stop
+                                    527 ;	dht11.c: 129: i2c_read (&x);
+      0001CA 96               [ 1]  528 	ldw	x, sp
+      0001CB 5C               [ 2]  529 	incw	x
+      0001CC 5C               [ 2]  530 	incw	x
+      0001CD 89               [ 2]  531 	pushw	x
+      0001CE CDr00r9D         [ 4]  532 	call	_i2c_read
+      0001D1 5B 02            [ 2]  533 	addw	sp, #2
+                                    534 ;	dht11.c: 130: return (x);
+      0001D3 7B 02            [ 1]  535 	ld	a, (0x02, sp)
+      0001D5 5B 02            [ 2]  536 	addw	sp, #2
+      0001D7 81               [ 4]  537 	ret
+                                    538 ;	dht11.c: 133: void InitializeI2C (void) {
+                                    539 ;	-----------------------------------------
+                                    540 ;	 function InitializeI2C
+                                    541 ;	-----------------------------------------
+      0001D8                        542 _InitializeI2C:
+                                    543 ;	dht11.c: 134: I2C_CR1 = 0;   //  Disable I2C before configuration starts. PE bit is bit 0
+      0001D8 AE 52 10         [ 2]  544 	ldw	x, #0x5210
+      0001DB 7F               [ 1]  545 	clr	(x)
+                                    546 ;	dht11.c: 138: I2C_FREQR = 16;                     //  Set the internal clock frequency (MHz).
+      0001DC AE 52 12         [ 2]  547 	ldw	x, #0x5212
+      0001DF A6 10            [ 1]  548 	ld	a, #0x10
+      0001E1 F7               [ 1]  549 	ld	(x), a
+                                    550 ;	dht11.c: 139: UNSET (I2C_CCRH, I2C_FS);           //  I2C running is standard mode.
+      0001E2 72 17 52 1C      [ 1]  551 	bres	0x521c, #7
+                                    552 ;	dht11.c: 141: I2C_CCRL = 0xa0;                    //  SCL clock speed is 50 kHz.
+      0001E6 AE 52 1B         [ 2]  553 	ldw	x, #0x521b
+      0001E9 A6 A0            [ 1]  554 	ld	a, #0xa0
+      0001EB F7               [ 1]  555 	ld	(x), a
+                                    556 ;	dht11.c: 143: I2C_CCRH &= 0x00;	// Clears lower 4 bits "CCR"
+      0001EC AE 52 1C         [ 2]  557 	ldw	x, #0x521c
+      0001EF 7F               [ 1]  558 	clr	(x)
+                                    559 ;	dht11.c: 147: UNSET (I2C_OARH, I2C_ADDMODE);      //  7 bit address mode.
+      0001F0 72 17 52 14      [ 1]  560 	bres	0x5214, #7
+                                    561 ;	dht11.c: 148: SET (I2C_OARH, I2C_ADDCONF);        //  Docs say this must always be 1.
+      0001F4 AE 52 14         [ 2]  562 	ldw	x, #0x5214
+      0001F7 F6               [ 1]  563 	ld	a, (x)
+      0001F8 AA 40            [ 1]  564 	or	a, #0x40
+      0001FA F7               [ 1]  565 	ld	(x), a
+                                    566 ;	dht11.c: 152: I2C_TRISER = 17;
+      0001FB AE 52 1D         [ 2]  567 	ldw	x, #0x521d
+      0001FE A6 11            [ 1]  568 	ld	a, #0x11
+      000200 F7               [ 1]  569 	ld	(x), a
+                                    570 ;	dht11.c: 160: I2C_CR1 = I2C_PE;	// Enables port
+      000201 AE 52 10         [ 2]  571 	ldw	x, #0x5210
+      000204 A6 01            [ 1]  572 	ld	a, #0x01
+      000206 F7               [ 1]  573 	ld	(x), a
+      000207 81               [ 4]  574 	ret
+                                    575 ;	dht11.c: 166: void InitializeUART() {
+                                    576 ;	-----------------------------------------
+                                    577 ;	 function InitializeUART
+                                    578 ;	-----------------------------------------
+      000208                        579 _InitializeUART:
+                                    580 ;	dht11.c: 176: UART1_CR1 = 0;
+      000208 AE 52 34         [ 2]  581 	ldw	x, #0x5234
+      00020B 7F               [ 1]  582 	clr	(x)
+                                    583 ;	dht11.c: 177: UART1_CR2 = 0;
+      00020C AE 52 35         [ 2]  584 	ldw	x, #0x5235
+      00020F 7F               [ 1]  585 	clr	(x)
+                                    586 ;	dht11.c: 178: UART1_CR4 = 0;
+      000210 AE 52 37         [ 2]  587 	ldw	x, #0x5237
+      000213 7F               [ 1]  588 	clr	(x)
+                                    589 ;	dht11.c: 179: UART1_CR3 = 0;
+      000214 AE 52 36         [ 2]  590 	ldw	x, #0x5236
+      000217 7F               [ 1]  591 	clr	(x)
+                                    592 ;	dht11.c: 180: UART1_CR5 = 0;
+      000218 AE 52 38         [ 2]  593 	ldw	x, #0x5238
+      00021B 7F               [ 1]  594 	clr	(x)
+                                    595 ;	dht11.c: 181: UART1_GTR = 0;
+      00021C AE 52 39         [ 2]  596 	ldw	x, #0x5239
+      00021F 7F               [ 1]  597 	clr	(x)
+                                    598 ;	dht11.c: 182: UART1_PSCR = 0;
+      000220 AE 52 3A         [ 2]  599 	ldw	x, #0x523a
+      000223 7F               [ 1]  600 	clr	(x)
+                                    601 ;	dht11.c: 186: UNSET (UART1_CR1, CR1_M);        //  8 Data bits.
+      000224 AE 52 34         [ 2]  602 	ldw	x, #0x5234
+      000227 F6               [ 1]  603 	ld	a, (x)
+      000228 A4 EF            [ 1]  604 	and	a, #0xef
+      00022A F7               [ 1]  605 	ld	(x), a
+                                    606 ;	dht11.c: 187: UNSET (UART1_CR1, CR1_PCEN);     //  Disable parity.
+      00022B AE 52 34         [ 2]  607 	ldw	x, #0x5234
+      00022E F6               [ 1]  608 	ld	a, (x)
+      00022F A4 FB            [ 1]  609 	and	a, #0xfb
+      000231 F7               [ 1]  610 	ld	(x), a
+                                    611 ;	dht11.c: 188: UNSET (UART1_CR3, CR3_STOPH);    //  1 stop bit.
+      000232 AE 52 36         [ 2]  612 	ldw	x, #0x5236
+      000235 F6               [ 1]  613 	ld	a, (x)
+      000236 A4 DF            [ 1]  614 	and	a, #0xdf
+      000238 F7               [ 1]  615 	ld	(x), a
+                                    616 ;	dht11.c: 189: UNSET (UART1_CR3, CR3_STOPL);    //  1 stop bit.
+      000239 AE 52 36         [ 2]  617 	ldw	x, #0x5236
+      00023C F6               [ 1]  618 	ld	a, (x)
+      00023D A4 EF            [ 1]  619 	and	a, #0xef
+      00023F F7               [ 1]  620 	ld	(x), a
+                                    621 ;	dht11.c: 190: UART1_BRR2 = 0x0a;      //  Set the baud rate registers to 115200 baud
+      000240 AE 52 33         [ 2]  622 	ldw	x, #0x5233
+      000243 A6 0A            [ 1]  623 	ld	a, #0x0a
+      000245 F7               [ 1]  624 	ld	(x), a
+                                    625 ;	dht11.c: 191: UART1_BRR1 = 0x08;      //  based upon a 16 MHz system clock.
+      000246 AE 52 32         [ 2]  626 	ldw	x, #0x5232
+      000249 A6 08            [ 1]  627 	ld	a, #0x08
+      00024B F7               [ 1]  628 	ld	(x), a
+                                    629 ;	dht11.c: 195: UNSET (UART1_CR2, CR2_TEN);      //  Disable transmit.
+      00024C AE 52 35         [ 2]  630 	ldw	x, #0x5235
+      00024F F6               [ 1]  631 	ld	a, (x)
+      000250 A4 F7            [ 1]  632 	and	a, #0xf7
+      000252 F7               [ 1]  633 	ld	(x), a
+                                    634 ;	dht11.c: 196: UNSET (UART1_CR2, CR2_REN);      //  Disable receive.
+      000253 AE 52 35         [ 2]  635 	ldw	x, #0x5235
+      000256 F6               [ 1]  636 	ld	a, (x)
+      000257 A4 FB            [ 1]  637 	and	a, #0xfb
+      000259 F7               [ 1]  638 	ld	(x), a
+                                    639 ;	dht11.c: 200: SET (UART1_CR3, CR3_CPOL);
+      00025A AE 52 36         [ 2]  640 	ldw	x, #0x5236
+      00025D F6               [ 1]  641 	ld	a, (x)
+      00025E AA 04            [ 1]  642 	or	a, #0x04
+      000260 F7               [ 1]  643 	ld	(x), a
+                                    644 ;	dht11.c: 201: SET (UART1_CR3, CR3_CPHA);
+      000261 AE 52 36         [ 2]  645 	ldw	x, #0x5236
+      000264 F6               [ 1]  646 	ld	a, (x)
+      000265 AA 02            [ 1]  647 	or	a, #0x02
+      000267 F7               [ 1]  648 	ld	(x), a
+                                    649 ;	dht11.c: 202: SET (UART1_CR3, CR3_LBCL);
+      000268 72 10 52 36      [ 1]  650 	bset	0x5236, #0
+                                    651 ;	dht11.c: 206: SET (UART1_CR2, CR2_TEN);
+      00026C AE 52 35         [ 2]  652 	ldw	x, #0x5235
+      00026F F6               [ 1]  653 	ld	a, (x)
+      000270 AA 08            [ 1]  654 	or	a, #0x08
+      000272 F7               [ 1]  655 	ld	(x), a
+                                    656 ;	dht11.c: 207: SET (UART1_CR2, CR2_REN);
+      000273 AE 52 35         [ 2]  657 	ldw	x, #0x5235
+      000276 F6               [ 1]  658 	ld	a, (x)
+      000277 AA 04            [ 1]  659 	or	a, #0x04
+      000279 F7               [ 1]  660 	ld	(x), a
+                                    661 ;	dht11.c: 208: UART1_CR3 = CR3_CLKEN;
+      00027A AE 52 36         [ 2]  662 	ldw	x, #0x5236
+      00027D A6 08            [ 1]  663 	ld	a, #0x08
+      00027F F7               [ 1]  664 	ld	(x), a
+      000280 81               [ 4]  665 	ret
+                                    666 ;	dht11.c: 236: void tm1637Init(void)
+                                    667 ;	-----------------------------------------
+                                    668 ;	 function tm1637Init
+                                    669 ;	-----------------------------------------
+      000281                        670 _tm1637Init:
+                                    671 ;	dht11.c: 238: tm1637SetBrightness(8);
+      000281 4B 08            [ 1]  672 	push	#0x08
+      000283 CDr03r26         [ 4]  673 	call	_tm1637SetBrightness
+      000286 84               [ 1]  674 	pop	a
+      000287 81               [ 4]  675 	ret
+                                    676 ;	dht11.c: 243: void tm1637DisplayDecimal(long TT,unsigned int displaySeparator)
+                                    677 ;	-----------------------------------------
+                                    678 ;	 function tm1637DisplayDecimal
+                                    679 ;	-----------------------------------------
+      000288                        680 _tm1637DisplayDecimal:
+      000288 52 13            [ 2]  681 	sub	sp, #19
+                                    682 ;	dht11.c: 245: unsigned int v = TT & 0x0000FFFF;
+      00028A 7B 19            [ 1]  683 	ld	a, (0x19, sp)
+      00028C 97               [ 1]  684 	ld	xl, a
+      00028D 7B 18            [ 1]  685 	ld	a, (0x18, sp)
+      00028F 95               [ 1]  686 	ld	xh, a
+      000290 0F 11            [ 1]  687 	clr	(0x11, sp)
+      000292 4F               [ 1]  688 	clr	a
+      000293 1F 05            [ 2]  689 	ldw	(0x05, sp), x
+                                    690 ;	dht11.c: 251: for (ii = 0; ii < 4; ++ii) {
+      000295 96               [ 1]  691 	ldw	x, sp
+      000296 5C               [ 2]  692 	incw	x
+      000297 1F 09            [ 2]  693 	ldw	(0x09, sp), x
+      000299 AEr05rF2         [ 2]  694 	ldw	x, #_segmentMap+0
+      00029C 1F 0D            [ 2]  695 	ldw	(0x0d, sp), x
+      00029E 90 5F            [ 1]  696 	clrw	y
+      0002A0                        697 00106$:
+                                    698 ;	dht11.c: 252: digitArr[ii] = segmentMap[v % 10];
+      0002A0 93               [ 1]  699 	ldw	x, y
+      0002A1 72 FB 09         [ 2]  700 	addw	x, (0x09, sp)
+      0002A4 1F 0B            [ 2]  701 	ldw	(0x0b, sp), x
+      0002A6 90 89            [ 2]  702 	pushw	y
+      0002A8 1E 07            [ 2]  703 	ldw	x, (0x07, sp)
+      0002AA 90 AE 00 0A      [ 2]  704 	ldw	y, #0x000a
+      0002AE 65               [ 2]  705 	divw	x, y
+      0002AF 93               [ 1]  706 	ldw	x, y
+      0002B0 90 85            [ 2]  707 	popw	y
+      0002B2 72 FB 0D         [ 2]  708 	addw	x, (0x0d, sp)
+      0002B5 F6               [ 1]  709 	ld	a, (x)
+      0002B6 1E 0B            [ 2]  710 	ldw	x, (0x0b, sp)
+      0002B8 F7               [ 1]  711 	ld	(x), a
+                                    712 ;	dht11.c: 253: if (ii == 2 && displaySeparator) {
+      0002B9 90 A3 00 02      [ 2]  713 	cpw	y, #0x0002
+      0002BD 26 0C            [ 1]  714 	jrne	00102$
+      0002BF 1E 1A            [ 2]  715 	ldw	x, (0x1a, sp)
+      0002C1 27 08            [ 1]  716 	jreq	00102$
+                                    717 ;	dht11.c: 254: digitArr[ii] |= 1 << 7;
+      0002C3 1E 0B            [ 2]  718 	ldw	x, (0x0b, sp)
+      0002C5 F6               [ 1]  719 	ld	a, (x)
+      0002C6 AA 80            [ 1]  720 	or	a, #0x80
+      0002C8 1E 0B            [ 2]  721 	ldw	x, (0x0b, sp)
+      0002CA F7               [ 1]  722 	ld	(x), a
+      0002CB                        723 00102$:
+                                    724 ;	dht11.c: 256: v /= 10;
+      0002CB 90 89            [ 2]  725 	pushw	y
+      0002CD 1E 07            [ 2]  726 	ldw	x, (0x07, sp)
+      0002CF 90 AE 00 0A      [ 2]  727 	ldw	y, #0x000a
+      0002D3 65               [ 2]  728 	divw	x, y
+      0002D4 90 85            [ 2]  729 	popw	y
+      0002D6 1F 05            [ 2]  730 	ldw	(0x05, sp), x
+                                    731 ;	dht11.c: 251: for (ii = 0; ii < 4; ++ii) {
+      0002D8 90 5C            [ 2]  732 	incw	y
+      0002DA 90 A3 00 04      [ 2]  733 	cpw	y, #0x0004
+      0002DE 25 C0            [ 1]  734 	jrc	00106$
+                                    735 ;	dht11.c: 259: _tm1637Start();
+      0002E0 CDr03r38         [ 4]  736 	call	__tm1637Start
+                                    737 ;	dht11.c: 260: _tm1637WriteByte(0x40);
+      0002E3 4B 40            [ 1]  738 	push	#0x40
+      0002E5 CDr03r8C         [ 4]  739 	call	__tm1637WriteByte
+      0002E8 84               [ 1]  740 	pop	a
+                                    741 ;	dht11.c: 261: _tm1637ReadResult();
+      0002E9 CDr03r71         [ 4]  742 	call	__tm1637ReadResult
+                                    743 ;	dht11.c: 262: _tm1637Stop();
+      0002EC CDr03r4A         [ 4]  744 	call	__tm1637Stop
+                                    745 ;	dht11.c: 264: _tm1637Start();
+      0002EF CDr03r38         [ 4]  746 	call	__tm1637Start
+                                    747 ;	dht11.c: 265: _tm1637WriteByte(0xc0);
+      0002F2 4B C0            [ 1]  748 	push	#0xc0
+      0002F4 CDr03r8C         [ 4]  749 	call	__tm1637WriteByte
+      0002F7 84               [ 1]  750 	pop	a
+                                    751 ;	dht11.c: 266: _tm1637ReadResult();
+      0002F8 CDr03r71         [ 4]  752 	call	__tm1637ReadResult
+                                    753 ;	dht11.c: 268: for (ii = 0; ii < 4; ++ii) {
+      0002FB 5F               [ 1]  754 	clrw	x
+      0002FC 1F 07            [ 2]  755 	ldw	(0x07, sp), x
+      0002FE                        756 00108$:
+                                    757 ;	dht11.c: 269: _tm1637WriteByte(digitArr[3 - ii]);
+      0002FE 7B 08            [ 1]  758 	ld	a, (0x08, sp)
+      000300 6B 0F            [ 1]  759 	ld	(0x0f, sp), a
+      000302 A6 03            [ 1]  760 	ld	a, #0x03
+      000304 10 0F            [ 1]  761 	sub	a, (0x0f, sp)
+      000306 5F               [ 1]  762 	clrw	x
+      000307 97               [ 1]  763 	ld	xl, a
+      000308 72 FB 09         [ 2]  764 	addw	x, (0x09, sp)
+      00030B F6               [ 1]  765 	ld	a, (x)
+      00030C 88               [ 1]  766 	push	a
+      00030D CDr03r8C         [ 4]  767 	call	__tm1637WriteByte
+      000310 84               [ 1]  768 	pop	a
+                                    769 ;	dht11.c: 270: _tm1637ReadResult();
+      000311 CDr03r71         [ 4]  770 	call	__tm1637ReadResult
+                                    771 ;	dht11.c: 268: for (ii = 0; ii < 4; ++ii) {
+      000314 1E 07            [ 2]  772 	ldw	x, (0x07, sp)
+      000316 5C               [ 2]  773 	incw	x
+      000317 1F 07            [ 2]  774 	ldw	(0x07, sp), x
+      000319 1E 07            [ 2]  775 	ldw	x, (0x07, sp)
+      00031B A3 00 04         [ 2]  776 	cpw	x, #0x0004
+      00031E 25 DE            [ 1]  777 	jrc	00108$
+                                    778 ;	dht11.c: 273: _tm1637Stop();
+      000320 CDr03r4A         [ 4]  779 	call	__tm1637Stop
+      000323 5B 13            [ 2]  780 	addw	sp, #19
+      000325 81               [ 4]  781 	ret
+                                    782 ;	dht11.c: 278: void tm1637SetBrightness(char brightness)
+                                    783 ;	-----------------------------------------
+                                    784 ;	 function tm1637SetBrightness
+                                    785 ;	-----------------------------------------
+      000326                        786 _tm1637SetBrightness:
+                                    787 ;	dht11.c: 285: _tm1637Start();
+      000326 CDr03r38         [ 4]  788 	call	__tm1637Start
+                                    789 ;	dht11.c: 286: _tm1637WriteByte(0x87 + brightness);
+      000329 7B 03            [ 1]  790 	ld	a, (0x03, sp)
+      00032B AB 87            [ 1]  791 	add	a, #0x87
+      00032D 88               [ 1]  792 	push	a
+      00032E CDr03r8C         [ 4]  793 	call	__tm1637WriteByte
+      000331 84               [ 1]  794 	pop	a
+                                    795 ;	dht11.c: 287: _tm1637ReadResult();
+      000332 CDr03r71         [ 4]  796 	call	__tm1637ReadResult
+                                    797 ;	dht11.c: 288: _tm1637Stop();
+      000335 CCr03r4A         [ 2]  798 	jp	__tm1637Stop
+                                    799 ;	dht11.c: 291: void _tm1637Start(void)
+                                    800 ;	-----------------------------------------
+                                    801 ;	 function _tm1637Start
+                                    802 ;	-----------------------------------------
+      000338                        803 __tm1637Start:
+                                    804 ;	dht11.c: 293: _tm1637ClkHigh();
+      000338 CDr03rCA         [ 4]  805 	call	__tm1637ClkHigh
+                                    806 ;	dht11.c: 294: _tm1637DioHigh();
+      00033B CDr03rDA         [ 4]  807 	call	__tm1637DioHigh
+                                    808 ;	dht11.c: 295: delay(5);
+      00033E 4B 05            [ 1]  809 	push	#0x05
+      000340 4B 00            [ 1]  810 	push	#0x00
+      000342 CDr00r52         [ 4]  811 	call	_delay
+      000345 5B 02            [ 2]  812 	addw	sp, #2
+                                    813 ;	dht11.c: 296: _tm1637DioLow();
+      000347 CCr03rE2         [ 2]  814 	jp	__tm1637DioLow
+                                    815 ;	dht11.c: 299: void _tm1637Stop(void)
+                                    816 ;	-----------------------------------------
+                                    817 ;	 function _tm1637Stop
+                                    818 ;	-----------------------------------------
+      00034A                        819 __tm1637Stop:
+                                    820 ;	dht11.c: 301: _tm1637ClkLow();
+      00034A CDr03rD2         [ 4]  821 	call	__tm1637ClkLow
+                                    822 ;	dht11.c: 302: delay(5);
+      00034D 4B 05            [ 1]  823 	push	#0x05
+      00034F 4B 00            [ 1]  824 	push	#0x00
+      000351 CDr00r52         [ 4]  825 	call	_delay
+      000354 5B 02            [ 2]  826 	addw	sp, #2
+                                    827 ;	dht11.c: 303: _tm1637DioLow();
+      000356 CDr03rE2         [ 4]  828 	call	__tm1637DioLow
+                                    829 ;	dht11.c: 304: delay(5);
+      000359 4B 05            [ 1]  830 	push	#0x05
+      00035B 4B 00            [ 1]  831 	push	#0x00
+      00035D CDr00r52         [ 4]  832 	call	_delay
+      000360 5B 02            [ 2]  833 	addw	sp, #2
+                                    834 ;	dht11.c: 305: _tm1637ClkHigh();
+      000362 CDr03rCA         [ 4]  835 	call	__tm1637ClkHigh
+                                    836 ;	dht11.c: 306: delay(5);
+      000365 4B 05            [ 1]  837 	push	#0x05
+      000367 4B 00            [ 1]  838 	push	#0x00
+      000369 CDr00r52         [ 4]  839 	call	_delay
+      00036C 5B 02            [ 2]  840 	addw	sp, #2
+                                    841 ;	dht11.c: 307: _tm1637DioHigh();
+      00036E CCr03rDA         [ 2]  842 	jp	__tm1637DioHigh
+                                    843 ;	dht11.c: 310: void _tm1637ReadResult(void)
+                                    844 ;	-----------------------------------------
+                                    845 ;	 function _tm1637ReadResult
+                                    846 ;	-----------------------------------------
+      000371                        847 __tm1637ReadResult:
+                                    848 ;	dht11.c: 312: _tm1637ClkLow();
+      000371 CDr03rD2         [ 4]  849 	call	__tm1637ClkLow
+                                    850 ;	dht11.c: 313: delay(5);
+      000374 4B 05            [ 1]  851 	push	#0x05
+      000376 4B 00            [ 1]  852 	push	#0x00
+      000378 CDr00r52         [ 4]  853 	call	_delay
+      00037B 5B 02            [ 2]  854 	addw	sp, #2
+                                    855 ;	dht11.c: 315: _tm1637ClkHigh();
+      00037D CDr03rCA         [ 4]  856 	call	__tm1637ClkHigh
+                                    857 ;	dht11.c: 316: delay(5);
+      000380 4B 05            [ 1]  858 	push	#0x05
+      000382 4B 00            [ 1]  859 	push	#0x00
+      000384 CDr00r52         [ 4]  860 	call	_delay
+      000387 5B 02            [ 2]  861 	addw	sp, #2
+                                    862 ;	dht11.c: 317: _tm1637ClkLow();
+      000389 CCr03rD2         [ 2]  863 	jp	__tm1637ClkLow
+                                    864 ;	dht11.c: 320: void _tm1637WriteByte(unsigned char b)
+                                    865 ;	-----------------------------------------
+                                    866 ;	 function _tm1637WriteByte
+                                    867 ;	-----------------------------------------
+      00038C                        868 __tm1637WriteByte:
+      00038C 52 02            [ 2]  869 	sub	sp, #2
+                                    870 ;	dht11.c: 322: for (ii = 0; ii < 8; ++ii) {
+      00038E 5F               [ 1]  871 	clrw	x
+      00038F 1F 01            [ 2]  872 	ldw	(0x01, sp), x
+      000391                        873 00105$:
+                                    874 ;	dht11.c: 323: _tm1637ClkLow();
+      000391 CDr03rD2         [ 4]  875 	call	__tm1637ClkLow
+                                    876 ;	dht11.c: 324: if (b & 0x01) {
+      000394 7B 05            [ 1]  877 	ld	a, (0x05, sp)
+      000396 44               [ 1]  878 	srl	a
+      000397 24 05            [ 1]  879 	jrnc	00102$
+                                    880 ;	dht11.c: 325: _tm1637DioHigh();
+      000399 CDr03rDA         [ 4]  881 	call	__tm1637DioHigh
+      00039C 20 03            [ 2]  882 	jra	00103$
+      00039E                        883 00102$:
+                                    884 ;	dht11.c: 328: _tm1637DioLow();
+      00039E CDr03rE2         [ 4]  885 	call	__tm1637DioLow
+      0003A1                        886 00103$:
+                                    887 ;	dht11.c: 330: delay(15);
+      0003A1 4B 0F            [ 1]  888 	push	#0x0f
+      0003A3 4B 00            [ 1]  889 	push	#0x00
+      0003A5 CDr00r52         [ 4]  890 	call	_delay
+      0003A8 5B 02            [ 2]  891 	addw	sp, #2
+                                    892 ;	dht11.c: 331: b >>= 1;
+      0003AA 7B 05            [ 1]  893 	ld	a, (0x05, sp)
+      0003AC 44               [ 1]  894 	srl	a
+      0003AD 6B 05            [ 1]  895 	ld	(0x05, sp), a
+                                    896 ;	dht11.c: 332: _tm1637ClkHigh();
+      0003AF CDr03rCA         [ 4]  897 	call	__tm1637ClkHigh
+                                    898 ;	dht11.c: 333: delay(15);
+      0003B2 4B 0F            [ 1]  899 	push	#0x0f
+      0003B4 4B 00            [ 1]  900 	push	#0x00
+      0003B6 CDr00r52         [ 4]  901 	call	_delay
+      0003B9 5B 02            [ 2]  902 	addw	sp, #2
+                                    903 ;	dht11.c: 322: for (ii = 0; ii < 8; ++ii) {
+      0003BB 1E 01            [ 2]  904 	ldw	x, (0x01, sp)
+      0003BD 5C               [ 2]  905 	incw	x
+      0003BE 1F 01            [ 2]  906 	ldw	(0x01, sp), x
+      0003C0 1E 01            [ 2]  907 	ldw	x, (0x01, sp)
+      0003C2 A3 00 08         [ 2]  908 	cpw	x, #0x0008
+      0003C5 2F CA            [ 1]  909 	jrslt	00105$
+      0003C7 5B 02            [ 2]  910 	addw	sp, #2
+      0003C9 81               [ 4]  911 	ret
+                                    912 ;	dht11.c: 339: void _tm1637ClkHigh(void)
+                                    913 ;	-----------------------------------------
+                                    914 ;	 function _tm1637ClkHigh
+                                    915 ;	-----------------------------------------
+      0003CA                        916 __tm1637ClkHigh:
+                                    917 ;	dht11.c: 344: PD_ODR |= 1 << 2;
+      0003CA AE 50 0F         [ 2]  918 	ldw	x, #0x500f
+      0003CD F6               [ 1]  919 	ld	a, (x)
+      0003CE AA 04            [ 1]  920 	or	a, #0x04
+      0003D0 F7               [ 1]  921 	ld	(x), a
+      0003D1 81               [ 4]  922 	ret
+                                    923 ;	dht11.c: 347: void _tm1637ClkLow(void)
+                                    924 ;	-----------------------------------------
+                                    925 ;	 function _tm1637ClkLow
+                                    926 ;	-----------------------------------------
+      0003D2                        927 __tm1637ClkLow:
+                                    928 ;	dht11.c: 351: PD_ODR &= ~(1 << 2);
+      0003D2 AE 50 0F         [ 2]  929 	ldw	x, #0x500f
+      0003D5 F6               [ 1]  930 	ld	a, (x)
+      0003D6 A4 FB            [ 1]  931 	and	a, #0xfb
+      0003D8 F7               [ 1]  932 	ld	(x), a
+      0003D9 81               [ 4]  933 	ret
+                                    934 ;	dht11.c: 357: void _tm1637DioHigh(void)
+                                    935 ;	-----------------------------------------
+                                    936 ;	 function _tm1637DioHigh
+                                    937 ;	-----------------------------------------
+      0003DA                        938 __tm1637DioHigh:
+                                    939 ;	dht11.c: 361: PD_ODR |= 1 << 3;
+      0003DA AE 50 0F         [ 2]  940 	ldw	x, #0x500f
+      0003DD F6               [ 1]  941 	ld	a, (x)
+      0003DE AA 08            [ 1]  942 	or	a, #0x08
+      0003E0 F7               [ 1]  943 	ld	(x), a
+      0003E1 81               [ 4]  944 	ret
+                                    945 ;	dht11.c: 365: void _tm1637DioLow(void)
+                                    946 ;	-----------------------------------------
+                                    947 ;	 function _tm1637DioLow
+                                    948 ;	-----------------------------------------
+      0003E2                        949 __tm1637DioLow:
+                                    950 ;	dht11.c: 367: PD_ODR &= ~(1 << 3);
+      0003E2 AE 50 0F         [ 2]  951 	ldw	x, #0x500f
+      0003E5 F6               [ 1]  952 	ld	a, (x)
+      0003E6 A4 F7            [ 1]  953 	and	a, #0xf7
+      0003E8 F7               [ 1]  954 	ld	(x), a
+      0003E9 81               [ 4]  955 	ret
+                                    956 ;	dht11.c: 374: void dht11_init(void)
+                                    957 ;	-----------------------------------------
+                                    958 ;	 function dht11_init
+                                    959 ;	-----------------------------------------
+      0003EA                        960 _dht11_init:
+                                    961 ;	dht11.c: 376: PA_DDR |= (1 << 3); //port PA3
+      0003EA AE 50 02         [ 2]  962 	ldw	x, #0x5002
+      0003ED F6               [ 1]  963 	ld	a, (x)
+      0003EE AA 08            [ 1]  964 	or	a, #0x08
+      0003F0 F7               [ 1]  965 	ld	(x), a
+                                    966 ;	dht11.c: 377: PA_ODR |= (1 << 3);
+      0003F1 AE 50 00         [ 2]  967 	ldw	x, #0x5000
+      0003F4 F6               [ 1]  968 	ld	a, (x)
+      0003F5 AA 08            [ 1]  969 	or	a, #0x08
+      0003F7 F7               [ 1]  970 	ld	(x), a
+      0003F8 81               [ 4]  971 	ret
+                                    972 ;	dht11.c: 387: unsigned char DHT_ReadData(unsigned char* data)
+                                    973 ;	-----------------------------------------
+                                    974 ;	 function DHT_ReadData
+                                    975 ;	-----------------------------------------
+      0003F9                        976 _DHT_ReadData:
+      0003F9 52 04            [ 2]  977 	sub	sp, #4
+                                    978 ;	dht11.c: 389: unsigned char byte_num = 0, bit_num = 0, byte = 0, count = 0;
+      0003FB 0F 02            [ 1]  979 	clr	(0x02, sp)
+      0003FD 0F 04            [ 1]  980 	clr	(0x04, sp)
+                                    981 ;	dht11.c: 391: PA_ODR &= ~(1 << 3);
+      0003FF AE 50 00         [ 2]  982 	ldw	x, #0x5000
+      000402 F6               [ 1]  983 	ld	a, (x)
+      000403 A4 F7            [ 1]  984 	and	a, #0xf7
+      000405 F7               [ 1]  985 	ld	(x), a
+                                    986 ;	dht11.c: 393: delay(1);
+      000406 4B 01            [ 1]  987 	push	#0x01
+      000408 4B 00            [ 1]  988 	push	#0x00
+      00040A CDr00r52         [ 4]  989 	call	_delay
+      00040D 5B 02            [ 2]  990 	addw	sp, #2
+                                    991 ;	dht11.c: 395: PA_ODR |= (1 << 3);
+      00040F AE 50 00         [ 2]  992 	ldw	x, #0x5000
+      000412 F6               [ 1]  993 	ld	a, (x)
+      000413 AA 08            [ 1]  994 	or	a, #0x08
+      000415 F7               [ 1]  995 	ld	(x), a
+                                    996 ;	dht11.c: 396: PA_DDR &= ~(1 << 3); //port PA3 as input
+      000416 AE 50 02         [ 2]  997 	ldw	x, #0x5002
+      000419 F6               [ 1]  998 	ld	a, (x)
+      00041A A4 F7            [ 1]  999 	and	a, #0xf7
+      00041C F7               [ 1] 1000 	ld	(x), a
+                                   1001 ;	dht11.c: 399: while (PA_IDR & (1<<3));          // wait sensor response 20-40us
+      00041D                       1002 00101$:
+      00041D AE 50 01         [ 2] 1003 	ldw	x, #0x5001
+      000420 F6               [ 1] 1004 	ld	a, (x)
+      000421 A4 08            [ 1] 1005 	and	a, #0x08
+      000423 4D               [ 1] 1006 	tnz	a
+      000424 26 F7            [ 1] 1007 	jrne	00101$
+                                   1008 ;	dht11.c: 400: while (!(PA_IDR & (1<<3)));          // pin low 80 ms :response 
+      000426                       1009 00104$:
+      000426 4D               [ 1] 1010 	tnz	a
+      000427 27 FD            [ 1] 1011 	jreq	00104$
+                                   1012 ;	dht11.c: 402: while (PA_IDR & (1<<3));          // pin high 
+      000429                       1013 00107$:
+      000429 4D               [ 1] 1014 	tnz	a
+      00042A 26 FD            [ 1] 1015 	jrne	00107$
+                                   1016 ;	dht11.c: 404: for (byte_num = 0; byte_num < NUM_OF_BYTES; byte_num++)
+      00042C 0F 01            [ 1] 1017 	clr	(0x01, sp)
+                                   1018 ;	dht11.c: 408: while (!(PA_IDR & (1<<3)));          // pin low 80 ms :response 
+      00042E                       1019 00130$:
+      00042E 0F 03            [ 1] 1020 	clr	(0x03, sp)
+      000430                       1021 00110$:
+                                   1022 ;	dht11.c: 399: while (PA_IDR & (1<<3));          // wait sensor response 20-40us
+      000430 AE 50 01         [ 2] 1023 	ldw	x, #0x5001
+      000433 F6               [ 1] 1024 	ld	a, (x)
+      000434 A4 08            [ 1] 1025 	and	a, #0x08
+                                   1026 ;	dht11.c: 408: while (!(PA_IDR & (1<<3)));          // pin low 80 ms :response 
+      000436 4D               [ 1] 1027 	tnz	a
+      000437 27 F7            [ 1] 1028 	jreq	00110$
+                                   1029 ;	dht11.c: 410: while (PA_IDR & (1<<3));          // pin high 
+      000439                       1030 00113$:
+      000439 4D               [ 1] 1031 	tnz	a
+      00043A 26 FD            [ 1] 1032 	jrne	00113$
+                                   1033 ;	dht11.c: 413: count++;
+      00043C 7B 04            [ 1] 1034 	ld	a, (0x04, sp)
+      00043E 4C               [ 1] 1035 	inc	a
+                                   1036 ;	dht11.c: 415: if (count > ONE_LOW)
+      00043F A1 82            [ 1] 1037 	cp	a, #0x82
+      000441 23 16            [ 2] 1038 	jrule	00117$
+                                   1039 ;	dht11.c: 417: byte |= (1 << (8 - bit_num));
+      000443 A6 08            [ 1] 1040 	ld	a, #0x08
+      000445 10 03            [ 1] 1041 	sub	a, (0x03, sp)
+      000447 95               [ 1] 1042 	ld	xh, a
+      000448 A6 01            [ 1] 1043 	ld	a, #0x01
+      00044A 88               [ 1] 1044 	push	a
+      00044B 9E               [ 1] 1045 	ld	a, xh
+      00044C 4D               [ 1] 1046 	tnz	a
+      00044D 27 05            [ 1] 1047 	jreq	00179$
+      00044F                       1048 00178$:
+      00044F 08 01            [ 1] 1049 	sll	(1, sp)
+      000451 4A               [ 1] 1050 	dec	a
+      000452 26 FB            [ 1] 1051 	jrne	00178$
+      000454                       1052 00179$:
+      000454 84               [ 1] 1053 	pop	a
+      000455 1A 02            [ 1] 1054 	or	a, (0x02, sp)
+      000457 6B 02            [ 1] 1055 	ld	(0x02, sp), a
+      000459                       1056 00117$:
+                                   1057 ;	dht11.c: 419: count = 0;
+      000459 0F 04            [ 1] 1058 	clr	(0x04, sp)
+                                   1059 ;	dht11.c: 406: for (bit_num = 0; bit_num < 8; bit_num++)
+      00045B 0C 03            [ 1] 1060 	inc	(0x03, sp)
+      00045D 7B 03            [ 1] 1061 	ld	a, (0x03, sp)
+      00045F A1 08            [ 1] 1062 	cp	a, #0x08
+      000461 25 CD            [ 1] 1063 	jrc	00110$
+                                   1064 ;	dht11.c: 421: *(data + byte_num) = byte;
+      000463 5F               [ 1] 1065 	clrw	x
+      000464 7B 01            [ 1] 1066 	ld	a, (0x01, sp)
+      000466 97               [ 1] 1067 	ld	xl, a
+      000467 72 FB 07         [ 2] 1068 	addw	x, (0x07, sp)
+      00046A 7B 02            [ 1] 1069 	ld	a, (0x02, sp)
+      00046C F7               [ 1] 1070 	ld	(x), a
+                                   1071 ;	dht11.c: 422: byte = 0;
+      00046D 0F 02            [ 1] 1072 	clr	(0x02, sp)
+                                   1073 ;	dht11.c: 404: for (byte_num = 0; byte_num < NUM_OF_BYTES; byte_num++)
+      00046F 0C 01            [ 1] 1074 	inc	(0x01, sp)
+      000471 7B 01            [ 1] 1075 	ld	a, (0x01, sp)
+      000473 A1 05            [ 1] 1076 	cp	a, #0x05
+      000475 25 B7            [ 1] 1077 	jrc	00130$
+                                   1078 ;	dht11.c: 424: return 0;
+      000477 4F               [ 1] 1079 	clr	a
+      000478 5B 04            [ 2] 1080 	addw	sp, #4
+      00047A 81               [ 4] 1081 	ret
+                                   1082 ;	dht11.c: 429: int main () {
+                                   1083 ;	-----------------------------------------
+                                   1084 ;	 function main
+                                   1085 ;	-----------------------------------------
+      00047B                       1086 _main:
+      00047B 52 1D            [ 2] 1087 	sub	sp, #29
+                                   1088 ;	dht11.c: 437: InitializeSystemClock();
+      00047D CDr00r08         [ 4] 1089 	call	_InitializeSystemClock
+                                   1090 ;	dht11.c: 442: PB_CR1 = (1 << 4) | (1 << 5); // push-pull
+      000480 AE 50 08         [ 2] 1091 	ldw	x, #0x5008
+      000483 A6 30            [ 1] 1092 	ld	a, #0x30
+      000485 F7               [ 1] 1093 	ld	(x), a
+                                   1094 ;	dht11.c: 444: PD_DDR = (1 << 3) | (1 << 2); // output mode
+      000486 AE 50 11         [ 2] 1095 	ldw	x, #0x5011
+      000489 A6 0C            [ 1] 1096 	ld	a, #0x0c
+      00048B F7               [ 1] 1097 	ld	(x), a
+                                   1098 ;	dht11.c: 445: PD_CR2 = (1 << 3) | (1 << 2); // up to 10MHz speed
+      00048C AE 50 13         [ 2] 1099 	ldw	x, #0x5013
+      00048F A6 0C            [ 1] 1100 	ld	a, #0x0c
+      000491 F7               [ 1] 1101 	ld	(x), a
+                                   1102 ;	dht11.c: 446: PD_CR1 = 0; // push-pull
+      000492 AE 50 12         [ 2] 1103 	ldw	x, #0x5012
+      000495 7F               [ 1] 1104 	clr	(x)
+                                   1105 ;	dht11.c: 447: PD_CR2 = 0; // up to 10MHz speed
+      000496 AE 50 13         [ 2] 1106 	ldw	x, #0x5013
+      000499 7F               [ 1] 1107 	clr	(x)
+                                   1108 ;	dht11.c: 448: tm1637Init();
+      00049A CDr02r81         [ 4] 1109 	call	_tm1637Init
+                                   1110 ;	dht11.c: 450: InitializeUART();
+      00049D CDr02r08         [ 4] 1111 	call	_InitializeUART
+                                   1112 ;	dht11.c: 451: UARTPrintF("uart initialised \n\r");
+      0004A0 AEr06r03         [ 2] 1113 	ldw	x, #___str_0+0
+      0004A3 89               [ 2] 1114 	pushw	x
+      0004A4 CDr00rE0         [ 4] 1115 	call	_UARTPrintF
+      0004A7 5B 02            [ 2] 1116 	addw	sp, #2
+                                   1117 ;	dht11.c: 453: dht11_init();	
+      0004A9 CDr03rEA         [ 4] 1118 	call	_dht11_init
+                                   1119 ;	dht11.c: 454: delay(200);
+      0004AC 4B C8            [ 1] 1120 	push	#0xc8
+      0004AE 4B 00            [ 1] 1121 	push	#0x00
+      0004B0 CDr00r52         [ 4] 1122 	call	_delay
+      0004B3 5B 02            [ 2] 1123 	addw	sp, #2
+                                   1124 ;	dht11.c: 456: DHT_ReadData(tmpr);
+      0004B5 96               [ 1] 1125 	ldw	x, sp
+      0004B6 1C 00 03         [ 2] 1126 	addw	x, #3
+      0004B9 1F 1C            [ 2] 1127 	ldw	(0x1c, sp), x
+      0004BB 1E 1C            [ 2] 1128 	ldw	x, (0x1c, sp)
+      0004BD 89               [ 2] 1129 	pushw	x
+      0004BE CDr03rF9         [ 4] 1130 	call	_DHT_ReadData
+      0004C1 5B 02            [ 2] 1131 	addw	sp, #2
+                                   1132 ;	dht11.c: 460: while (1) {
+      0004C3                       1133 00114$:
+                                   1134 ;	dht11.c: 461: objTemp = tmpr[0]; // humidity 
+      0004C3 1E 1C            [ 2] 1135 	ldw	x, (0x1c, sp)
+      0004C5 F6               [ 1] 1136 	ld	a, (x)
+      0004C6 88               [ 1] 1137 	push	a
+      0004C7 CDr00r00         [ 4] 1138 	call	___uchar2fs
+      0004CA 84               [ 1] 1139 	pop	a
+      0004CB 1F 10            [ 2] 1140 	ldw	(0x10, sp), x
+      0004CD 17 0E            [ 2] 1141 	ldw	(0x0e, sp), y
+                                   1142 ;	dht11.c: 466: while (objTemp > 1000) {
+      0004CF 5F               [ 1] 1143 	clrw	x
+      0004D0 1F 01            [ 2] 1144 	ldw	(0x01, sp), x
+      0004D2                       1145 00101$:
+      0004D2 5F               [ 1] 1146 	clrw	x
+      0004D3 89               [ 2] 1147 	pushw	x
+      0004D4 4B 7A            [ 1] 1148 	push	#0x7a
+      0004D6 4B 44            [ 1] 1149 	push	#0x44
+      0004D8 1E 14            [ 2] 1150 	ldw	x, (0x14, sp)
+      0004DA 89               [ 2] 1151 	pushw	x
+      0004DB 1E 14            [ 2] 1152 	ldw	x, (0x14, sp)
+      0004DD 89               [ 2] 1153 	pushw	x
+      0004DE CDr00r00         [ 4] 1154 	call	___fsgt
+      0004E1 5B 08            [ 2] 1155 	addw	sp, #8
+      0004E3 4D               [ 1] 1156 	tnz	a
+      0004E4 27 1C            [ 1] 1157 	jreq	00127$
+                                   1158 ;	dht11.c: 467: vierde+=1;
+      0004E6 1E 01            [ 2] 1159 	ldw	x, (0x01, sp)
+      0004E8 5C               [ 2] 1160 	incw	x
+      0004E9 1F 01            [ 2] 1161 	ldw	(0x01, sp), x
+                                   1162 ;	dht11.c: 468: objTemp-=1000;
+      0004EB 5F               [ 1] 1163 	clrw	x
+      0004EC 89               [ 2] 1164 	pushw	x
+      0004ED 4B 7A            [ 1] 1165 	push	#0x7a
+      0004EF 4B 44            [ 1] 1166 	push	#0x44
+      0004F1 1E 14            [ 2] 1167 	ldw	x, (0x14, sp)
+      0004F3 89               [ 2] 1168 	pushw	x
+      0004F4 1E 14            [ 2] 1169 	ldw	x, (0x14, sp)
+      0004F6 89               [ 2] 1170 	pushw	x
+      0004F7 CDr00r00         [ 4] 1171 	call	___fssub
+      0004FA 5B 08            [ 2] 1172 	addw	sp, #8
+      0004FC 1F 10            [ 2] 1173 	ldw	(0x10, sp), x
+      0004FE 17 0E            [ 2] 1174 	ldw	(0x0e, sp), y
+      000500 20 D0            [ 2] 1175 	jra	00101$
+                                   1176 ;	dht11.c: 470: while (objTemp > 100) {
+      000502                       1177 00127$:
+      000502 16 01            [ 2] 1178 	ldw	y, (0x01, sp)
+      000504 17 1A            [ 2] 1179 	ldw	(0x1a, sp), y
+      000506 5F               [ 1] 1180 	clrw	x
+      000507 1F 08            [ 2] 1181 	ldw	(0x08, sp), x
+      000509                       1182 00104$:
+      000509 5F               [ 1] 1183 	clrw	x
+      00050A 89               [ 2] 1184 	pushw	x
+      00050B 4B C8            [ 1] 1185 	push	#0xc8
+      00050D 4B 42            [ 1] 1186 	push	#0x42
+      00050F 1E 14            [ 2] 1187 	ldw	x, (0x14, sp)
+      000511 89               [ 2] 1188 	pushw	x
+      000512 1E 14            [ 2] 1189 	ldw	x, (0x14, sp)
+      000514 89               [ 2] 1190 	pushw	x
+      000515 CDr00r00         [ 4] 1191 	call	___fsgt
+      000518 5B 08            [ 2] 1192 	addw	sp, #8
+      00051A 4D               [ 1] 1193 	tnz	a
+      00051B 27 1C            [ 1] 1194 	jreq	00128$
+                                   1195 ;	dht11.c: 471: derde+=1;
+      00051D 1E 08            [ 2] 1196 	ldw	x, (0x08, sp)
+      00051F 5C               [ 2] 1197 	incw	x
+      000520 1F 08            [ 2] 1198 	ldw	(0x08, sp), x
+                                   1199 ;	dht11.c: 472: objTemp-=100;
+      000522 5F               [ 1] 1200 	clrw	x
+      000523 89               [ 2] 1201 	pushw	x
+      000524 4B C8            [ 1] 1202 	push	#0xc8
+      000526 4B 42            [ 1] 1203 	push	#0x42
+      000528 1E 14            [ 2] 1204 	ldw	x, (0x14, sp)
+      00052A 89               [ 2] 1205 	pushw	x
+      00052B 1E 14            [ 2] 1206 	ldw	x, (0x14, sp)
+      00052D 89               [ 2] 1207 	pushw	x
+      00052E CDr00r00         [ 4] 1208 	call	___fssub
+      000531 5B 08            [ 2] 1209 	addw	sp, #8
+      000533 1F 10            [ 2] 1210 	ldw	(0x10, sp), x
+      000535 17 0E            [ 2] 1211 	ldw	(0x0e, sp), y
+      000537 20 D0            [ 2] 1212 	jra	00104$
+                                   1213 ;	dht11.c: 474: while (objTemp > 10) {
+      000539                       1214 00128$:
+      000539 16 08            [ 2] 1215 	ldw	y, (0x08, sp)
+      00053B 17 18            [ 2] 1216 	ldw	(0x18, sp), y
+      00053D 5F               [ 1] 1217 	clrw	x
+      00053E 1F 0A            [ 2] 1218 	ldw	(0x0a, sp), x
+      000540                       1219 00107$:
+      000540 5F               [ 1] 1220 	clrw	x
+      000541 89               [ 2] 1221 	pushw	x
+      000542 4B 20            [ 1] 1222 	push	#0x20
+      000544 4B 41            [ 1] 1223 	push	#0x41
+      000546 1E 14            [ 2] 1224 	ldw	x, (0x14, sp)
+      000548 89               [ 2] 1225 	pushw	x
+      000549 1E 14            [ 2] 1226 	ldw	x, (0x14, sp)
+      00054B 89               [ 2] 1227 	pushw	x
+      00054C CDr00r00         [ 4] 1228 	call	___fsgt
+      00054F 5B 08            [ 2] 1229 	addw	sp, #8
+      000551 4D               [ 1] 1230 	tnz	a
+      000552 27 1C            [ 1] 1231 	jreq	00129$
+                                   1232 ;	dht11.c: 475: tweede+=1;
+      000554 1E 0A            [ 2] 1233 	ldw	x, (0x0a, sp)
+      000556 5C               [ 2] 1234 	incw	x
+      000557 1F 0A            [ 2] 1235 	ldw	(0x0a, sp), x
+                                   1236 ;	dht11.c: 476: objTemp-=10;
+      000559 5F               [ 1] 1237 	clrw	x
+      00055A 89               [ 2] 1238 	pushw	x
+      00055B 4B 20            [ 1] 1239 	push	#0x20
+      00055D 4B 41            [ 1] 1240 	push	#0x41
+      00055F 1E 14            [ 2] 1241 	ldw	x, (0x14, sp)
+      000561 89               [ 2] 1242 	pushw	x
+      000562 1E 14            [ 2] 1243 	ldw	x, (0x14, sp)
+      000564 89               [ 2] 1244 	pushw	x
+      000565 CDr00r00         [ 4] 1245 	call	___fssub
+      000568 5B 08            [ 2] 1246 	addw	sp, #8
+      00056A 1F 10            [ 2] 1247 	ldw	(0x10, sp), x
+      00056C 17 0E            [ 2] 1248 	ldw	(0x0e, sp), y
+      00056E 20 D0            [ 2] 1249 	jra	00107$
+                                   1250 ;	dht11.c: 478: while (objTemp > 0)
+      000570                       1251 00129$:
+      000570 16 0A            [ 2] 1252 	ldw	y, (0x0a, sp)
+      000572 17 16            [ 2] 1253 	ldw	(0x16, sp), y
+      000574 5F               [ 1] 1254 	clrw	x
+      000575 1F 0C            [ 2] 1255 	ldw	(0x0c, sp), x
+      000577                       1256 00110$:
+      000577 5F               [ 1] 1257 	clrw	x
+      000578 89               [ 2] 1258 	pushw	x
+      000579 5F               [ 1] 1259 	clrw	x
+      00057A 89               [ 2] 1260 	pushw	x
+      00057B 1E 14            [ 2] 1261 	ldw	x, (0x14, sp)
+      00057D 89               [ 2] 1262 	pushw	x
+      00057E 1E 14            [ 2] 1263 	ldw	x, (0x14, sp)
+      000580 89               [ 2] 1264 	pushw	x
+      000581 CDr00r00         [ 4] 1265 	call	___fsgt
+      000584 5B 08            [ 2] 1266 	addw	sp, #8
+      000586 4D               [ 1] 1267 	tnz	a
+      000587 27 1C            [ 1] 1268 	jreq	00112$
+                                   1269 ;	dht11.c: 480: eerste+=1;
+      000589 1E 0C            [ 2] 1270 	ldw	x, (0x0c, sp)
+      00058B 5C               [ 2] 1271 	incw	x
+      00058C 1F 0C            [ 2] 1272 	ldw	(0x0c, sp), x
+                                   1273 ;	dht11.c: 481: objTemp-=1;
+      00058E 5F               [ 1] 1274 	clrw	x
+      00058F 89               [ 2] 1275 	pushw	x
+      000590 4B 80            [ 1] 1276 	push	#0x80
+      000592 4B 3F            [ 1] 1277 	push	#0x3f
+      000594 1E 14            [ 2] 1278 	ldw	x, (0x14, sp)
+      000596 89               [ 2] 1279 	pushw	x
+      000597 1E 14            [ 2] 1280 	ldw	x, (0x14, sp)
+      000599 89               [ 2] 1281 	pushw	x
+      00059A CDr00r00         [ 4] 1282 	call	___fssub
+      00059D 5B 08            [ 2] 1283 	addw	sp, #8
+      00059F 1F 10            [ 2] 1284 	ldw	(0x10, sp), x
+      0005A1 17 0E            [ 2] 1285 	ldw	(0x0e, sp), y
+      0005A3 20 D2            [ 2] 1286 	jra	00110$
+      0005A5                       1287 00112$:
+                                   1288 ;	dht11.c: 492: utemp=vierde*1000+derde*100+tweede*10+eerste;
+      0005A5 1E 1A            [ 2] 1289 	ldw	x, (0x1a, sp)
+      0005A7 89               [ 2] 1290 	pushw	x
+      0005A8 4B E8            [ 1] 1291 	push	#0xe8
+      0005AA 4B 03            [ 1] 1292 	push	#0x03
+      0005AC CDr00r00         [ 4] 1293 	call	__mulint
+      0005AF 5B 04            [ 2] 1294 	addw	sp, #4
+      0005B1 1F 14            [ 2] 1295 	ldw	(0x14, sp), x
+      0005B3 1E 18            [ 2] 1296 	ldw	x, (0x18, sp)
+      0005B5 89               [ 2] 1297 	pushw	x
+      0005B6 4B 64            [ 1] 1298 	push	#0x64
+      0005B8 4B 00            [ 1] 1299 	push	#0x00
+      0005BA CDr00r00         [ 4] 1300 	call	__mulint
+      0005BD 5B 04            [ 2] 1301 	addw	sp, #4
+      0005BF 72 FB 14         [ 2] 1302 	addw	x, (0x14, sp)
+      0005C2 1F 12            [ 2] 1303 	ldw	(0x12, sp), x
+      0005C4 1E 16            [ 2] 1304 	ldw	x, (0x16, sp)
+      0005C6 89               [ 2] 1305 	pushw	x
+      0005C7 4B 0A            [ 1] 1306 	push	#0x0a
+      0005C9 4B 00            [ 1] 1307 	push	#0x00
+      0005CB CDr00r00         [ 4] 1308 	call	__mulint
+      0005CE 5B 04            [ 2] 1309 	addw	sp, #4
+      0005D0 72 FB 12         [ 2] 1310 	addw	x, (0x12, sp)
+      0005D3 72 FB 0C         [ 2] 1311 	addw	x, (0x0c, sp)
+      0005D6 90 5F            [ 1] 1312 	clrw	y
+      0005D8 5D               [ 2] 1313 	tnzw	x
+      0005D9 2A 02            [ 1] 1314 	jrpl	00162$
+      0005DB 90 5A            [ 2] 1315 	decw	y
+      0005DD                       1316 00162$:
+                                   1317 ;	dht11.c: 495: tm1637DisplayDecimal(utemp, 1); // eg 37:12
+      0005DD 4B 01            [ 1] 1318 	push	#0x01
+      0005DF 4B 00            [ 1] 1319 	push	#0x00
+      0005E1 89               [ 2] 1320 	pushw	x
+      0005E2 90 89            [ 2] 1321 	pushw	y
+      0005E4 CDr02r88         [ 4] 1322 	call	_tm1637DisplayDecimal
+      0005E7 5B 06            [ 2] 1323 	addw	sp, #6
+                                   1324 ;	dht11.c: 498: delayTenMicro();
+      0005E9 CDr00r00         [ 4] 1325 	call	_delayTenMicro
+      0005EC CCr04rC3         [ 2] 1326 	jp	00114$
+      0005EF 5B 1D            [ 2] 1327 	addw	sp, #29
+      0005F1 81               [ 4] 1328 	ret
+                                   1329 	.area CODE
+      0005F2                       1330 _segmentMap:
+      0005F2 3F                    1331 	.db #0x3F	;  63
+      0005F3 06                    1332 	.db #0x06	;  6
+      0005F4 5B                    1333 	.db #0x5B	;  91
+      0005F5 4F                    1334 	.db #0x4F	;  79	'O'
+      0005F6 66                    1335 	.db #0x66	;  102	'f'
+      0005F7 6D                    1336 	.db #0x6D	;  109	'm'
+      0005F8 7D                    1337 	.db #0x7D	;  125
+      0005F9 07                    1338 	.db #0x07	;  7
+      0005FA 7F                    1339 	.db #0x7F	;  127
+      0005FB 6F                    1340 	.db #0x6F	;  111	'o'
+      0005FC 77                    1341 	.db #0x77	;  119	'w'
+      0005FD 7C                    1342 	.db #0x7C	;  124
+      0005FE 39                    1343 	.db #0x39	;  57	'9'
+      0005FF 5E                    1344 	.db #0x5E	;  94
+      000600 79                    1345 	.db #0x79	;  121	'y'
+      000601 71                    1346 	.db #0x71	;  113	'q'
+      000602 00                    1347 	.db #0x00	;  0
+      000603                       1348 ___str_0:
+      000603 75 61 72 74 20 69 6E  1349 	.ascii "uart initialised "
+             69 74 69 61 6C 69 73
+             65 64 20
+      000614 0A                    1350 	.db 0x0A
+      000615 0D                    1351 	.db 0x0D
+      000616 00                    1352 	.db 0x00
+                                   1353 	.area INITIALIZER
+                                   1354 	.area CABS (ABS)
