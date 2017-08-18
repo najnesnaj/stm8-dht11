@@ -1,3 +1,6 @@
+// dht11 on port PA3
+
+
 #include "stm8.h"
 #include <string.h>
 #define SET(x, y)   (x) |= (y)
